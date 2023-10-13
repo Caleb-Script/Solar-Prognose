@@ -36,7 +36,7 @@ public class SolarPrognoseConsumer {
                         "Key: " + record.key() + ", " +
                         "Value: " + record.value() + ", " +
                         "Topic: " + record.topic() + ", " +
-                        "Partition: " + record.partition() + ", " +
+                        //"Partition: " + record.partition() + ", " +
                         "Offset: " + record.offset() +
                         "\n");
             }

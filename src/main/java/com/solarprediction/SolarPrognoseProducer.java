@@ -35,13 +35,13 @@ import java.util.Scanner;
         Scanner scanner = new Scanner(System.in);
 
         // Benachrichtigt den Benutzer und fordern eine Adresse an
-        System.out.println("Gib eine Adresse ein (z.B: Namurstraße 4, 70374 Stuttgart): ");
+        System.out.print("Gib eine Adresse ein (z.B: Namurstraße 4, 70374 Stuttgart): ");
 
         // Lesen Sie die Eingabe des Benutzers
         String adresse = scanner.nextLine();
 
         // Benachrichtigt den Benutzer und fordert die Solarleistung an
-        System.out.println("Geben Sie die Leistung der Solaranlage (in Watt) an(im moment nur mit dem Wert 1!: ");
+        System.out.print("Geben Sie die Leistung der Solaranlage (in Watt) an (Fließkommazahl von 1-90): ");
         float solarLeistung = scanner.nextFloat(); // Liest eine Fließkommazahl von der Konsole
 
         String DataAdresse = Geocoding(adresse);
