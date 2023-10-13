@@ -41,7 +41,7 @@ import java.util.Scanner;
         String adresse = scanner.nextLine();
 
         // Benachrichtigt den Benutzer und fordert die Solarleistung an
-        System.out.println("Geben Sie die Leistung der Solaranlage (in Watt) an: ");
+        System.out.println("Geben Sie die Leistung der Solaranlage (in Watt) an(im moment nur mit dem Wert 1!: ");
         float solarLeistung = scanner.nextFloat(); // Liest eine Fließkommazahl von der Konsole
 
         String DataAdresse = Geocoding(adresse);
