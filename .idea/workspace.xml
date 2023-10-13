@@ -5,6 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4980dba0-8838-4748-a7e3-55aab45bc3e1" name="Changes" comment=".">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/solarprediction/SolarPrognoseConsumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/solarprediction/SolarPrognoseConsumer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/solarprediction/SolarPrognoseProducer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/solarprediction/SolarPrognoseProducer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -102,7 +104,7 @@
       <updated>1697219946809</updated>
       <workItem from="1697219947998" duration="1452000" />
       <workItem from="1697221413947" duration="857000" />
-      <workItem from="1697222312833" duration="1686000" />
+      <workItem from="1697222312833" duration="2967000" />
     </task>
     <task id="LOCAL-00001" summary=".">
       <option name="closed" value="true" />
@@ -144,7 +146,15 @@
       <option name="project" value="LOCAL" />
       <updated>1697223843144</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary=".">
+      <option name="closed" value="true" />
+      <created>1697224445285</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1697224445285</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
