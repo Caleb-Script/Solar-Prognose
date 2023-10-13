@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
@@ -56,7 +57,7 @@ import java.util.Scanner;
 
         try {
             // Nominatim-Anfrage
-            String codierteAdresse = URLEncoder.encode(adresse, "UTF-8");
+            String codierteAdresse = URLEncoder.encode(adresse, StandardCharsets.UTF_8);
             String url = "https://nominatim.openstreetmap.org/search?q=" + codierteAdresse + "&format=json";
             HttpURLConnection verbindung = (HttpURLConnection) new URL(url).openConnection();
             verbindung.setRequestMethod("GET");
@@ -88,9 +89,7 @@ import java.util.Scanner;
                 } else {
                     System.out.println("Adresse nicht gefunden.");
                 }
-            } else {
-                System.out.println("Fehler bei der Anfrage. HTTP-Statuscode: " + antwortCode);
-            }
+            } else System.out.println("Fehler bei der Anfrage. HTTP-Statuscode: " + antwortCode);
         } catch (Exception e) {
             e.printStackTrace();
         }
