@@ -1,32 +1,31 @@
 package com.solarprediction;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
 
-        import com.fasterxml.jackson.databind.JsonNode;
-        import com.fasterxml.jackson.databind.ObjectMapper;
-        import com.google.gson.JsonArray;
-        import com.google.gson.JsonObject;
-        import com.google.gson.JsonParser;
-        import org.apache.http.client.HttpClient;
-        import org.apache.http.client.methods.HttpGet;
-        import org.apache.http.impl.client.HttpClients;
-        import org.apache.http.util.EntityUtils;
-        import org.apache.kafka.clients.producer.KafkaProducer;
-        import org.apache.kafka.clients.producer.Producer;
-        import org.apache.kafka.clients.producer.ProducerRecord;
-        import org.apache.kafka.common.serialization.StringSerializer;
-
-        import java.io.BufferedReader;
-        import java.io.InputStreamReader;
-        import java.io.UnsupportedEncodingException;
-        import java.net.HttpURLConnection;
-        import java.net.URL;
-        import java.net.URLEncoder;
-        import java.time.LocalDate;
-        import java.time.format.DateTimeFormatter;
-        import java.util.Iterator;
-        import java.util.Map;
-        import java.util.Properties;
-        import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Scanner;
 
  class SolarPrognoseProducer {
     public static void main(String[] args) {
@@ -35,7 +34,7 @@ package com.solarprediction;
         Scanner scanner = new Scanner(System.in);
 
         // Benachrichtigt den Benutzer und fordern eine Adresse an
-        System.out.println("Gib eine Adresse ein (Straße Nr, PLZ Ort): ");
+        System.out.println("Gib eine Adresse ein (z.B: Namurstraße 4, 70374 Stuttgart): ");
 
         // Lesen Sie die Eingabe des Benutzers
         String adresse = scanner.nextLine();
@@ -44,9 +43,9 @@ package com.solarprediction;
         System.out.println("Geben Sie die Leistung der Solaranlage (in Watt) an: ");
         float solarLeistung = scanner.nextFloat(); // Liest eine Fließkommazahl von der Konsole
 
-        adresse = Geocoding(adresse);
+        String DataAdresse = Geocoding(adresse);
 
-        SolarPrognoseServer(adresse, solarLeistung);
+        SolarPrognoseServer(DataAdresse, solarLeistung,adresse);
 
         // Schließe den Scanner, weil man ihn nicht mehr braucht
         scanner.close();
@@ -99,7 +98,7 @@ package com.solarprediction;
         return daten;
     }
 
-    private static void SolarPrognoseServer(String adresse, float solarLeistung) {
+    private static void SolarPrognoseServer(String DataAdresse, float solarLeistung, String adresse) {
         // Konfiguration für den Kafka-Producer
         Properties kafkaEigenschaften = new Properties();
         kafkaEigenschaften.put("bootstrap.servers", "localhost:9092");
@@ -111,7 +110,7 @@ package com.solarprediction;
         try {
             // Erstellen Sie die API-Anfrage-URL mit Adresse und Leistung
             String url = "https://api.forecast.solar/estimate/watthours/day/%s/%.2f/1.00/1.00?time=utc";
-            String apiUrl = String.format(url, adresse, solarLeistung);
+            String apiUrl = String.format(url, DataAdresse, solarLeistung);
 
             // HTTP-Client erstellen
             HttpClient httpClient = HttpClients.createDefault();
@@ -120,8 +119,8 @@ package com.solarprediction;
             // API-Anfrage senden und Antwort abrufen
             String antwort = EntityUtils.toString(httpClient.execute(httpGet).getEntity());
 
-            // Extrahieren Sie die Solarproduktionswerte aus der Antwort
-            String solarPrognose = extrahiereSolarproduktionFuersAktuellesDatum(antwort);
+            // Extrahiere die Solarproduktionswerte aus der Antwort
+            String solarPrognose = extrahiereSolarproduktionFuersAktuellesDatum(antwort, adresse);
 
             // Nachricht an Kafka senden
             ProducerRecord<String, String> aufzeichnung = new ProducerRecord<>("solar-prognose", solarPrognose);
@@ -129,14 +128,14 @@ package com.solarprediction;
 
             produzent.close();
         } catch (UnsupportedEncodingException e) {
-            // Hier können Sie den Fehler behandeln oder die Ausnahme auslösen, falls erforderlich
+            // Hier werden die Fehler behandeln die Ausnahme auslösen, falls erforderlich
             System.out.println("Fehler: " + e); // Hier wird die Ausnahme einfach gedruckt
         } catch (Exception e) {
             System.out.println("Fehler: " + e);
         }
     }
 
-    private static String extrahiereSolarproduktionFuersAktuellesDatum(String antwort) {
+    private static String extrahiereSolarproduktionFuersAktuellesDatum(String antwort, String adresse) {
         try {
             // Verwenden Sie eine JSON-Verarbeitungsbibliothek, um das JSON-Objekt aus der API-Antwort zu extrahieren.
             ObjectMapper objektmapper = new ObjectMapper();
@@ -147,14 +146,10 @@ package com.solarprediction;
             DateTimeFormatter datumsformatierer = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             String aktuellesDatumString = aktuellesDatum.format(datumsformatierer);
 
-            System.out.println(aktuellesDatum);
-
-            // Prüfen Sie, ob die API-Antwort ein Feld für das aktuelle Datum enthält, wobei Uhrzeit ignoriert wird
+            // Prüfe, ob die API-Antwort ein Feld für das aktuelle Datum enthält, wobei Uhrzeit ignoriert wird
             boolean gefunden = false;
             JsonNode ergebnisKnoten = wurzelknoten.path("result");
             Iterator<Map.Entry<String, JsonNode>> feldIterator = ergebnisKnoten.fields();
-
-            System.out.println(antwort);
 
             while (feldIterator.hasNext()) {
                 Map.Entry<String, JsonNode> eintrag = feldIterator.next();
@@ -166,7 +161,9 @@ package com.solarprediction;
                     if (datumKnoten.isInt()) {
                         // Wenn das Feld gefunden wird und ein Integer ist, extrahieren Sie den Wert.
                         int solarProduktion = datumKnoten.asInt();
-                        return "Solarproduktion am " + feldName + ": " + solarProduktion + " Wattstunden (Wh)";
+                        String result = String.format("Solarproduktion am %s bei der %s beträgt %s Wattstunden (Wh)", feldName, adresse, solarProduktion);
+                        return result;
+
                     } else {
                         return "Fehler: Solarproduktion für das aktuelle Datum ist kein ganzzahliger Wert.";
                     }
@@ -177,11 +174,9 @@ package com.solarprediction;
                 return "Für das aktuelle Datum wurde keine Solarproduktion gefunden.";
             }
         } catch (Exception e) {
-            // Hier können Sie Fehlerbehandlung hinzufügen, wenn beim Extrahieren der Prognose ein Fehler auftritt.
             System.out.println("Fehler beim Extrahieren der Solarproduktion: " + e.getMessage());
             return "Fehler: Fehler bei der Extraktion der Solarproduktion";
         }
-        // Fügen Sie ein Standard-Rückgabewert hinzu, wenn keine der Bedingungen erfüllt ist
-        return "Keine Solarproduktion gefunden."; // Oder einen geeigneten Text nach Ihren Anforderungen.
+        return "Keine Solarproduktion gefunden.";
     }
 }
