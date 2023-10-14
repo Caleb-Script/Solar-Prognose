@@ -11,20 +11,28 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+
+
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+
 import java.nio.charset.StandardCharsets;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -120,6 +128,9 @@ import java.util.Scanner;
             // API-Anfrage senden und Antwort abrufen
             String antwort = EntityUtils.toString(httpClient.execute(httpGet).getEntity());
 
+            System.out.println(apiUrl);
+            System.out.println(antwort);
+
             // Extrahiere die Solarproduktionswerte aus der Antwort
             String solarPrognose = extrahiereSolarproduktionFuersAktuellesDatum(antwort, adresse, solarLeistung);
 
@@ -166,7 +177,6 @@ import java.util.Scanner;
                         return result;
 
                     } else {
-
                         return "Fehler: Solarproduktion für das aktuelle Datum ist kein ganzzahliger Wert.";
                     }
                 }
@@ -174,6 +184,9 @@ import java.util.Scanner;
 
             if (!gefunden) {
                 String result = String.format("Für das aktuelle Datum %s bei der %s mit der Solarleistung %.2f wurde keine Solarproduktion gefunden.", aktuellesDatumString, adresse,solarLeistung);
+
+                //gibt, aus wann man die api wieder versuchen kann
+                printRateLimit(antwort);
                 return result;
             }
         } catch (Exception e) {
@@ -182,4 +195,25 @@ import java.util.Scanner;
         }
         return "Keine Solarproduktion gefunden.";
     }
+
+     public static void printRateLimit(String antwort) {
+         try {
+             // Parse das JSON-Objekt
+             JSONObject jsonObject = new JSONObject(antwort);
+
+             // Extrahiere die Rate-Limit-Informationen
+             JSONObject rateLimit = jsonObject.getJSONObject("message").getJSONObject("ratelimit");
+             int limit = rateLimit.getInt("limit");
+             int period = rateLimit.getInt("period");
+             String retryAt = rateLimit.getString("retry-at");
+
+             // Gib die Informationen in der Konsole aus
+             System.out.println("Rate Limit Informationen:");
+             System.out.println("Limit: " + limit);
+             System.out.println("Period: " + period);
+             System.out.println("Retry At: " + retryAt);
+         } catch (Exception e) {
+             System.err.println("Fehler beim Verarbeiten des JSON-Texts: " + e.getMessage());
+         }
+     }
 }
