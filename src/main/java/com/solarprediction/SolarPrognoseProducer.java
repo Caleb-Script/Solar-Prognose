@@ -128,8 +128,7 @@ import java.util.Scanner;
             // API-Anfrage senden und Antwort abrufen
             String antwort = EntityUtils.toString(httpClient.execute(httpGet).getEntity());
 
-            System.out.println(apiUrl);
-            System.out.println(antwort);
+            System.out.println("URL: " + apiUrl);
 
             // Extrahiere die Solarproduktionswerte aus der Antwort
             String solarPrognose = extrahiereSolarproduktionFuersAktuellesDatum(antwort, adresse, solarLeistung);
