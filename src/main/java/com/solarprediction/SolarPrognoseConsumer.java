@@ -47,7 +47,7 @@ public class SolarPrognoseConsumer {
             while (true) {
                 ConsumerRecords<String, String> aufzeichnungen = verbraucher.poll(100);
                 for (ConsumerRecord<String, String> aufzeichnung : aufzeichnungen) {
-                    logger.info("\nNeue Nachricht: \n" +
+                    logger.info("Neue Nachricht: \n" +
                             "Schlüssel: " + aufzeichnung.key() + ", " +
                             "Wert: " + aufzeichnung.value() + ", " +
                             "Thema: " + aufzeichnung.topic() + ", " +

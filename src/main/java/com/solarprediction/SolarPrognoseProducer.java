@@ -121,7 +121,7 @@ import java.util.Scanner;
             String antwort = EntityUtils.toString(httpClient.execute(httpGet).getEntity());
 
             // Extrahiere die Solarproduktionswerte aus der Antwort
-            String solarPrognose = extrahiereSolarproduktionFuersAktuellesDatum(antwort, adresse);
+            String solarPrognose = extrahiereSolarproduktionFuersAktuellesDatum(antwort, adresse, solarLeistung);
 
             // Nachricht an Kafka senden
             ProducerRecord<String, String> aufzeichnung = new ProducerRecord<>("solar-prognose", solarPrognose);
@@ -136,7 +136,7 @@ import java.util.Scanner;
         }
     }
 
-    private static String extrahiereSolarproduktionFuersAktuellesDatum(String antwort, String adresse) {
+    private static String extrahiereSolarproduktionFuersAktuellesDatum(String antwort, String adresse, float solarLeistung) {
         try {
             // Verwenden Sie eine JSON-Verarbeitungsbibliothek, um das JSON-Objekt aus der API-Antwort zu extrahieren.
             ObjectMapper objektmapper = new ObjectMapper();
@@ -162,17 +162,19 @@ import java.util.Scanner;
                     if (datumKnoten.isInt()) {
                         // Wenn das Feld gefunden wird und ein Integer ist, extrahieren Sie den Wert.
                         int solarProduktion = datumKnoten.asInt();
-                        String result = String.format("Solarproduktion am %s bei der %s beträgt %s Wattstunden (Wh)", feldName, adresse, solarProduktion);
+                        String result = String.format("Die Solarproduktion am %s bei der %s mit der Solarleistung %.2f beträgt %s Wattstunden (Wh)", feldName, adresse,solarLeistung, solarProduktion);
                         return result;
 
                     } else {
+
                         return "Fehler: Solarproduktion für das aktuelle Datum ist kein ganzzahliger Wert.";
                     }
                 }
             }
 
             if (!gefunden) {
-                return "Für das aktuelle Datum wurde keine Solarproduktion gefunden.";
+                String result = String.format("Für das aktuelle Datum %s bei der %s mit der Solarleistung %.2f wurde keine Solarproduktion gefunden.", aktuellesDatumString, adresse,solarLeistung);
+                return result;
             }
         } catch (Exception e) {
             System.out.println("Fehler beim Extrahieren der Solarproduktion: " + e.getMessage());
